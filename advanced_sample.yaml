@@ -1,0 +1,71 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: This template builds an Amazon Linux EC2 Instance  and  related S3 Bucket
+Metadata:
+  Instances:
+    Description: 'Building and provisioning Amazon Linux 2 '
+Parameters:
+  InstanceType:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+    - t2.micro
+    - m1.small
+    - m1.large
+    Description: Enter t2.micro, m1.small, or m1.large. Default is t2.micro.
+  EnvType:
+    Type: String
+    Default: Staging
+    AllowedValues:
+    - Staging
+    - Production
+    Description: Enter a environment type. Valid values are Staging or Production
+# we use the intrinsic function fn:fininmap to map what AMI ID Image Id we want to use for our ec instance based on region the stack is launched in 
+Mappings:
+  RegionMap:
+    us-east-1:
+      HVM64: ami-0ff8a91507f77f867
+      HVMG2: ami-0a584ac55a7631c0c
+    us-west-1:
+      HVM64: ami-0bdb828fd58c52235
+      HVMG2: ami-066ee5fd4a9ef77f1
+    eu-west-1:
+      HVM64: ami-047bb4163c506cd98
+      HVMG2: ami-0a7c483d527806435
+    ap-southeast-1:
+      HVM64: ami-08569b978cc4dfa10
+      HVMG2: ami-0be9df32ae9f92309
+    ap-northeast-1:
+      HVM64: ami-06cd52961ce9f0d85
+      HVMG2: ami-053cdd503598e4a9d
+# If the EnvType / Enviroment is production stack, we create a provided s3 bucket 
+Conditions:
+  CreateBucket:
+    Fn::Equals:
+    - Ref: EnvType
+    - Production
+# the FnInMAp select which ami id to use for the property image ID 
+Resources:
+  myEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId:
+        Fn::FindInMap:
+        - RegionMap
+        - Ref: AWS::Region
+        - HVM64
+      InstanceType:
+        Ref: InstanceType
+  # here is another example of an intrinsic function that allows to us to 
+  # substitute the full bucket name with the our region and account id 
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Condition: CreateBucket
+    Properties:
+      BucketName:
+        Fn::Sub: tutorialbucket-${AWS::Region}-${AWS::AccountId}
+Outputs:
+  InstanceId:
+    Description: 'ID of the instance in demo stack'
+    Value:
+      Ref: myEC2Instance
