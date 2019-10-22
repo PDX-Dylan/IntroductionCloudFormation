@@ -1,9 +1,9 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
-Description: This template builds an Amazon Linux EC2 Instance
+Description: 'Amazon Linux EC2 Instance'
 Metadata:
   Instances:
-    Description: 'Building and provisioning Amazon Linux 2 for video demo '
+    Description: 'EC2 CloudFormation video demo'
 Parameters:
   InstanceType:
     Type: String
@@ -12,23 +12,28 @@ Parameters:
     - t2.micro
     - t2.small
     - t2.medium
-    Description: Enter t2.micro, t2.small, or t2.medium. Default is t2.micro.
+    Description: 't2.micro, t2.small, or t2.medium'
   ImageID:
     Type: String
     Default: ami-0b69ea66ff7391e80
     AllowedValues:
     - ami-0b69ea66ff7391e80
-    Description: 'AMI limited for starter launch to : ami-0b69ea66ff7391e80 '
+    Description: 'AMI ami-0b69ea66ff7391e80'
+# See the advanced template for an example for Mappings, Condtions, and Transforms
+# Mappings - Fn::FindInMap  
+# Conditions -  Fn::Equals,Fn::And,Fn::If,Fn::Not,Fn::Or
+# Transform - AWS::Serverless,
+# See the advanced template for an example
 Resources:
   myEC2Instance:
     Type: AWS::EC2::Instance
     Properties:
-      ImageId:
-        Ref: ImageID
       InstanceType:
         Ref: InstanceType
+      ImageId:
+        Ref: ImageID
 Outputs:
   InstanceId:
-    Description: Id of the instance built in demo stack
+    Description: 'ID of the instance in demo stack'
     Value:
       Ref: myEC2Instance
